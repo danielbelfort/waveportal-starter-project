@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import './App.css';
-import abi from "./utils/WavePortal.json";
+import abi from "../contracts/WavePortal.json";
 
 export default function App() {
 
@@ -18,14 +18,13 @@ export default function App() {
       const { ethereum } = window;
 
       if (!ethereum) {
-        console.log("Make sure you have metamask!");
+        console.log("Make sure you install metamask");
         return;
       } else {
         console.log("We have the ethereum object", ethereum);
       }
-      /*
-      * Check if we're authorized to access the user's wallet
-      */
+      
+      /* Check if we're authorized to access the user's wallet */
       const accounts = await ethereum.request({ method: 'eth_accounts' });
 
       if (accounts.length !== 0) {
@@ -42,25 +41,26 @@ export default function App() {
   }
 
   const loadTotalWaves = async () => {
-  try {
-      const { ethereum } = window;
-
-      if (ethereum) {
-        const provider = new ethers.providers.Web3Provider(ethereum);
-        const signer = provider.getSigner();
-        const wavePortalContract = new ethers.Contract(contractAddress, contractABI, signer);
-
-        let count = await wavePortalContract.getTotalWaves();
-        setTotalWaves(count.toString());
-
-      } else {
-        console.log("Ethereum object doesn't exist");
+    try {
+        const { ethereum } = window;
+  
+        if (ethereum) {
+          const provider = new ethers.providers.Web3Provider(ethereum);
+          const signer = provider.getSigner();
+          const wavePortalContract = new ethers.Contract(contractAddress, contractABI, signer);
+  
+          let count = await wavePortalContract.getTotalWaves();
+          setTotalWaves(count.toString());
+  
+        } else {
+          console.log("Ethereum object doesn't exist");
+        }
+      } catch (error) {
+        console.log(error)
       }
-    } catch (error) {
-      console.log(error)
-    }
   }
 
+  
   const wave = async () => {
     try {
       const { ethereum } = window;
@@ -91,7 +91,7 @@ export default function App() {
       const { ethereum } = window;
 
       if (!ethereum) {
-        alert("Get MetaMask!");
+        alert("Get MetaMask");
         return;
       }
 
@@ -150,21 +150,35 @@ export default function App() {
       <div className="dataContainer">
 
         <div className="header">
-          Daniel's Immutable Guest Book
+          Daniel's Immutable Guest Book 🍃
         </div>
 
         <div className="bio">
-          Whatever you write here is going on-chain and can't ever be changed.
+          Welcome! Whatever you post here is going on-chain and can't ever be changed.
         </div>
 
-        {
-        currentAccount ? (<textarea name="tweetArea"
-          placeholder="hi! cool stuff..."
+        <br></br>
+
+        {/*
+        * If there is no currentAccount render this button */}
+        {!currentAccount && (
+          <button className="walletButton" onClick={connectWallet}>
+            Connect Wallet
+        </button>
+        )}
+
+        <br></br>
+
+        <textarea
+          name="tweetArea"
+          rows="5"
+          placeholder="Hi! Cool stuff..."
           type="text"
           id="tweet"
           value={tweetValue}
-          onChange={e => setTweetValue(e.target.value)} />) : null
-        }
+          onChange={e => setTweetValue(e.target.value)}
+        >
+        </textarea>
       
         <button className="waveButton" onClick={wave}>
           <b>Post Forever</b>
@@ -172,17 +186,10 @@ export default function App() {
 
         <div className="waveCount">
           Total Posts: {totalWaves}
+          {/*<TotalPosts/>*/}
         </div>
-        
-        {/*
-        * If there is no currentAccount render this button
-        */}
-        {!currentAccount && (
-          <button className="waveButton" onClick={connectWallet}>
-            Connect Wallet
-        </button>
-        )}
 
+        {/* Render all posted messages */}
         {allWaves.map((wave, index) => {
           return (
             <div key={index} style={{ backgroundColor: "OldLace", marginTop: "16px", padding: "8px" }}>
