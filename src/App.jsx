@@ -2,14 +2,17 @@ import React, { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import './App.css';
 import abi from "../contracts/WavePortal.json";
+import WaveList from "../components/WaveList";
 
 export default function App() {
-
+  // state variables
   const [currentAccount, setCurrentAccount] = useState("");
   const [allWaves, setAllWaves] = useState([]);
+  const [waveList, setWaveList] = useState([]);
   const [totalWaves, setTotalWaves] = useState("")
   const [tweetValue, setTweetValue] = useState("")
 
+  // smart contract data
   const contractAddress = "0xd941a930aEf7C1C4acD16D3274Ff590181fef15F";
   const contractABI = abi.abi;
 
@@ -59,7 +62,6 @@ export default function App() {
         console.log(error)
       }
   }
-
   
   const wave = async () => {
     try {
@@ -145,6 +147,12 @@ export default function App() {
     loadTotalWaves();
   }, [])
 
+  // when “currentAccount” changes out of "" or when there is a new wave
+  // Render all posted messages
+  useEffect(() => {
+    <WaveList waveList={allWaves} />
+  }, [currentAccount, allWaves])
+
   return (
     <div className="mainContainer">
       <div className="dataContainer">
@@ -159,8 +167,7 @@ export default function App() {
 
         <br></br>
 
-        {/*
-        * If there is no currentAccount render this button */}
+        {/* If there is no currentAccount render this button */}
         {!currentAccount && (
           <button className="walletButton" onClick={connectWallet}>
             Connect Wallet
@@ -189,15 +196,7 @@ export default function App() {
           {/*<TotalPosts/>*/}
         </div>
 
-        {/* Render all posted messages */}
-        {allWaves.map((wave, index) => {
-          return (
-            <div key={index} style={{ backgroundColor: "OldLace", marginTop: "16px", padding: "8px" }}>
-              <div>Address: {wave.address}</div>
-              <div>Time: {wave.timestamp.toString()}</div>
-              <div>Message: {wave.message}</div>
-            </div>)
-        }).reverse()}
+        <WaveList waveList={allWaves} />
 
       </div>
     </div>
