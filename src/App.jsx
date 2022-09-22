@@ -176,14 +176,14 @@ export default function App() {
 
         <br></br>
 
-        {/* If there is no currentAccount: render this button */}
+        {/* if there is no currentAccount: render this button */}
         {!currentAccount && (
           <button className="walletButton" onClick={connectWallet}>
             Connect Wallet
         </button>
         )}
 
-        {/* If there is a currentAccount: render this button */}
+        {/* if there is a currentAccount: render this button */}
         {currentAccount && (
           <div className="justifyCenter">
             <span className="connected" />
@@ -213,7 +213,7 @@ export default function App() {
           <b>Post Forever</b>
         </button>
 
-        {/* If there is a currentAccount: render this button */}
+        {/* if there is a currentAccount: render this button */}
         {currentAccount && (
           <div className="waveCount">
             Total Posts: {totalWaves}
