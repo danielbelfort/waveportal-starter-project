@@ -173,11 +173,19 @@ export default function App() {
 
         <br></br>
 
-        {/* If there is no currentAccount render this button */}
+        {/* If there is no currentAccount: render this button */}
         {!currentAccount && (
           <button className="walletButton" onClick={connectWallet}>
             Connect Wallet
         </button>
+        )}
+
+        {/* If there is a currentAccount: render this button */}
+        {currentAccount && (
+          <div className="justifyCenter">
+            <span className="connected" />
+            Wallet Conected
+          </div>
         )}
 
         <br></br>
