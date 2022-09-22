@@ -9,8 +9,8 @@ export default function App() {
   const [currentAccount, setCurrentAccount] = useState("");
   const [allWaves, setAllWaves] = useState([]);
   const [waveList, setWaveList] = useState([]);
-  const [totalWaves, setTotalWaves] = useState("")
-  const [tweetValue, setTweetValue] = useState("")
+  const [totalWaves, setTotalWaves] = useState("");
+  const [tweetValue, setTweetValue] = useState("");
 
   // smart contract data
   const contractAddress = "0xd941a930aEf7C1C4acD16D3274Ff590181fef15F";
@@ -156,6 +156,8 @@ export default function App() {
 
   // when there's a new wave or account just connects, render the wave list
   useEffect(() => {
+    getAllWaves();
+    loadTotalWaves();
     <WaveList waveList={allWaves} />
   }, [currentAccount, allWaves])
 
@@ -196,6 +198,7 @@ export default function App() {
           placeholder="Hi! Cool stuff..."
           type="text"
           id="tweet"
+          disabled
           value={tweetValue}
           onChange={e => setTweetValue(e.target.value)}
         >
@@ -205,10 +208,12 @@ export default function App() {
           <b>Post Forever</b>
         </button>
 
-        <div className="waveCount">
-          Total Posts: {totalWaves}
-          {/*<TotalPosts/>*/}
-        </div>
+        {/* If there is a currentAccount: render this button */}
+        {currentAccount && (
+          <div className="waveCount">
+            Total Posts: {totalWaves}
+          </div>
+        )}
 
         <WaveList waveList={allWaves} />
 
