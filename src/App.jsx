@@ -16,6 +16,7 @@ export default function App() {
   const contractAddress = "0xd941a930aEf7C1C4acD16D3274Ff590181fef15F";
   const contractABI = abi.abi;
 
+  // is the wallet connected? function
   const checkIfWalletIsConnected = async () => {
     try {
       const { ethereum } = window;
@@ -27,7 +28,7 @@ export default function App() {
         console.log("We have the ethereum object", ethereum);
       }
       
-      /* Check if we're authorized to access the user's wallet */
+      // check if we're authorized to access the user's wallet
       const accounts = await ethereum.request({ method: 'eth_accounts' });
 
       if (accounts.length !== 0) {
@@ -43,6 +44,26 @@ export default function App() {
     }
   }
 
+  // connect the wallet
+  const connectWallet = async () => {
+    try {
+      const { ethereum } = window;
+
+      if (!ethereum) {
+        alert("Get MetaMask");
+        return;
+      }
+
+      const accounts = await ethereum.request({ method: "eth_requestAccounts" });
+
+      console.log("Connected", accounts[0]);
+      setCurrentAccount(accounts[0]);
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  // a call to setTotalWaves
   const loadTotalWaves = async () => {
     try {
         const { ethereum } = window;
@@ -62,7 +83,9 @@ export default function App() {
         console.log(error)
       }
   }
-  
+
+  // call the contract to mine a wave
+  // then load up the total waves state
   const wave = async () => {
     try {
       const { ethereum } = window;
@@ -88,24 +111,7 @@ export default function App() {
     }
   }
 
-  const connectWallet = async () => {
-    try {
-      const { ethereum } = window;
-
-      if (!ethereum) {
-        alert("Get MetaMask");
-        return;
-      }
-
-      const accounts = await ethereum.request({ method: "eth_requestAccounts" });
-
-      console.log("Connected", accounts[0]);
-      setCurrentAccount(accounts[0]);
-    } catch (error) {
-      console.log(error)
-    }
-  }
-
+  // getter for all of the contract waves (always listening)
   const getAllWaves = async() => {
     try {
       const { ethereum } = window;
@@ -113,8 +119,9 @@ export default function App() {
         const provider = new ethers.providers.Web3Provider(ethereum);
         const signer = provider.getSigner();
         const wavePortalContract = new ethers.Contract(contractAddress, contractABI, signer);
-        const waves = await wavePortalContract.getAllWaves();
 
+        // grab all the waves from the contract (cleanly) and set allWaves
+        const waves = await wavePortalContract.getAllWaves();
         let wavesCleaned = [];
         waves.forEach(wave => {
           wavesCleaned.push({
@@ -125,9 +132,9 @@ export default function App() {
         });
         setAllWaves(wavesCleaned);
 
+        // on each new wave: announce it and change the AllWaves state
         wavePortalContract.on("NewWave", (from, timestamp, message) => {
           console.log("NewWave", from, timestamp, message);
-
           setAllWaves(prevState => [...prevState, {
             address: from,
             timestamp: new Date(timestamp * 1000),
@@ -147,8 +154,7 @@ export default function App() {
     loadTotalWaves();
   }, [])
 
-  // when “currentAccount” changes out of "" or when there is a new wave
-  // Render all posted messages
+  // when there's a new wave or account just connects, render the wave list
   useEffect(() => {
     <WaveList waveList={allWaves} />
   }, [currentAccount, allWaves])
@@ -176,7 +182,7 @@ export default function App() {
 
         <br></br>
 
-        <textarea
+        <textarea className="input"
           name="tweetArea"
           rows="5"
           placeholder="Hi! Cool stuff..."
