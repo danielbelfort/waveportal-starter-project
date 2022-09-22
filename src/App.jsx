@@ -3,6 +3,7 @@ import { ethers } from "ethers";
 import './App.css';
 import abi from "../contracts/WavePortal.json";
 import WaveList from "../components/WaveList";
+import classNames from "classnames";
 
 export default function App() {
   // state variables
@@ -198,13 +199,17 @@ export default function App() {
           placeholder="Hi! Cool stuff..."
           type="text"
           id="tweet"
-          disabled
+          disabled = {!Boolean(currentAccount)}
           value={tweetValue}
           onChange={e => setTweetValue(e.target.value)}
         >
         </textarea>
-      
-        <button className="waveButton" onClick={wave}>
+
+        <button
+          className="waveButton"
+          onClick={wave}
+          disabled = {!Boolean(currentAccount)}
+        >
           <b>Post Forever</b>
         </button>
 
