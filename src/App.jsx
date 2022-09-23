@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { ethers } from "ethers";
 import './App.css';
 import abi from "../contracts/WavePortal.json";
@@ -12,6 +12,15 @@ export default function App() {
   const [waveList, setWaveList] = useState([]);
   const [totalWaves, setTotalWaves] = useState("");
   const [tweetValue, setTweetValue] = useState("");
+  const [walletNetwork, setNetwork] = useState(null);
+
+  const networkName = useMemo(() => {
+		if (!walletNetwork) {
+			return "";
+		}
+		return walletNetwork.name;
+	}, [walletNetwork]);
+  const isRinkeby = networkName === "rinkeby";
 
   // smart contract data
   const contractAddress = "0xd941a930aEf7C1C4acD16D3274Ff590181fef15F";
@@ -150,12 +159,32 @@ export default function App() {
     }
   }
 
+  // get the wallet's network
+  function getNetwork() {
+  	if (!window.ethereum) {
+  		return false;
+  	}
+  	const provider = new ethers.providers.Web3Provider(window.ethereum);
+  	return provider.getNetwork();
+  }
+
+  // reload the page on each detected network change
   useEffect(() => {
+    if (window.ethereum) {
+      window.ethereum.on('chainChanged', () => { window.location.reload(); })
+    }
+  })
+  
+  // on each page load or reload
+  useEffect(async () => {
     checkIfWalletIsConnected();
     loadTotalWaves();
+    setNetwork(await getNetwork());
+    console.log({})
   }, [])
 
-  // when there's a new wave or account just connects, render the wave list
+  // when there's a new wave or account just connects:
+  // render the wave list and update the walletNetwork variable
   useEffect(() => {
     getAllWaves();
     loadTotalWaves();
@@ -176,20 +205,24 @@ export default function App() {
 
         <br></br>
 
-        {/* If there is no currentAccount: render this button */}
+        {/* if there is no currentAccount: render this button */}
         {!currentAccount && (
           <button className="walletButton" onClick={connectWallet}>
             Connect Wallet
         </button>
         )}
 
-        {/* If there is a currentAccount: render this button */}
-        {currentAccount && (
-          <div className="justifyCenter">
-            <span className="connected" />
-            Wallet Conected
-          </div>
-        )}
+        {/* if there is a currentAccount: render this button */}
+        {/* taking into account the wallet's network */}
+        <div className="justifyCenter">
+          {currentAccount && (
+            <div className="connected"></div>
+          )}
+          <span>Wallet Conected </span>
+          {networkName != "rinkeby" && (
+              <div className="networkInvalid"> (Switch to Rinkeby) </div>
+          )}
+        </div>
 
         <br></br>
 
@@ -199,7 +232,7 @@ export default function App() {
           placeholder="Hi! Cool stuff..."
           type="text"
           id="tweet"
-          disabled = {!Boolean(currentAccount)}
+          disabled = {!Boolean(currentAccount) || !isRinkeby}
           value={tweetValue}
           onChange={e => setTweetValue(e.target.value)}
         >
@@ -208,13 +241,13 @@ export default function App() {
         <button
           className="waveButton"
           onClick={wave}
-          disabled = {!Boolean(currentAccount)}
+          disabled = {!Boolean(currentAccount) || !isRinkeby}
         >
           <b>Post Forever</b>
         </button>
 
-        {/* If there is a currentAccount: render this button */}
-        {currentAccount && (
+        {/* if there is a currentAccount: render this button */}
+        {currentAccount && isRinkeby && (
           <div className="waveCount">
             Total Posts: {totalWaves}
           </div>
