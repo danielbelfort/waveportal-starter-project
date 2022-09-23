@@ -226,6 +226,7 @@ export default function App() {
 
         <br></br>
 
+        {/* the text box */}
         <textarea className="input"
           name="tweetArea"
           rows="5"
@@ -238,6 +239,7 @@ export default function App() {
         >
         </textarea>
 
+        {/* the post button */}
         <button
           className="waveButton"
           onClick={wave}
