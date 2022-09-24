@@ -15,7 +15,8 @@ export default function App() {
   const [tweetValue, setTweetValue] = useState("");
   const [walletNetwork, setNetwork] = useState(null);
   const [writeLoading, setWriteLoading] = useState(false);
-
+  
+  // Metamask network variables
   const networkName = useMemo(() => {
 		if (!walletNetwork) {
 			return "";
@@ -27,8 +28,8 @@ export default function App() {
   // smart contract data
   const contractAddress = "0xd941a930aEf7C1C4acD16D3274Ff590181fef15F";
   const contractABI = abi.abi;
-
-  // is the wallet connected? function
+  
+  // "is the wallet connected?"
   const checkIfWalletIsConnected = async () => {
     try {
       const { ethereum } = window;
@@ -65,7 +66,6 @@ export default function App() {
         alert("Get MetaMask");
         return;
       }
-
       const accounts = await ethereum.request({ method: "eth_requestAccounts" });
 
       console.log("Connected", accounts[0]);
@@ -99,9 +99,9 @@ export default function App() {
   // call the contract to mine a wave
   // then load up the total waves state
   const wave = async () => {
+    
     try {
-      const { ethereum } = window;
-
+      const { ethereum } = window; 
       if (ethereum) {
         // prep the txn
         const provider = new ethers.providers.Web3Provider(ethereum);
@@ -113,13 +113,12 @@ export default function App() {
         await waveTxn.wait();
         console.log("Mined -- ", waveTxn.hash);
         // clean-up
-        setWriteLoading(false);
+        loadTotalWaves();
+        setWriteLoading(current => !current)
       } else {
-        setWriteLoading(false);
         console.log("Ethereum object doesn't exist");
       }
     } catch (error) {
-      setWriteLoading(false);
       console.log(error)
     }
   }
@@ -163,13 +162,22 @@ export default function App() {
   }
 
   // get the wallet's network
-  function getNetwork() {
+  const getNetwork = async() => {
   	if (!window.ethereum) {
   		return false;
   	}
   	const provider = new ethers.providers.Web3Provider(window.ethereum);
   	return provider.getNetwork();
   }
+
+  // wave button handler
+  const waveButtonHandler = () => {
+    setWriteLoading(true)
+    setTweetValue("")
+    return wave()
+  }
+
+  /// STATE EFFECTS
 
   // first page pass
   useEffect(async () => {
@@ -185,13 +193,17 @@ export default function App() {
     }
   })
 
-  // when there's a new wave or account just connects:
-  // render the wave list, update walletNetwork & writeLoading
+  // when there's a new wave or account first connects:
+  // render the wave list
   useEffect(() => {
-    getAllWaves();
-    loadTotalWaves();
     <WaveList waveList={allWaves} />
-  }, [currentAccount, allWaves])
+  }, [allWaves, currentAccount])
+
+  // for debugging purposes
+  useEffect(() => {
+    console.log('writeLoading is: ', writeLoading);
+    console.log('currentAccount is: ', currentAccount);
+  }, [writeLoading, currentAccount]);
 
   return (
     <div className="mainContainer">
@@ -232,7 +244,7 @@ export default function App() {
         <textarea className="input"
           name="tweetArea"
           rows="5"
-          placeholder="Hi! Cool stuff..."
+          placeholder=""
           type="text"
           id="tweet"
           disabled = {!Boolean(currentAccount) || !isRinkeby}
@@ -243,13 +255,15 @@ export default function App() {
 
         {/* the post button */}
         {!writeLoading && (
-          <button
-          className="waveButton"
-          onClick={() => { setWriteLoading(true); wave(); }}
-          disabled = {!Boolean(currentAccount) || !isRinkeby}
-          >
-          <b>Post Forever</b>
-        </button>
+          <div className="justifyCenter">
+            <button
+              className="waveButton"
+              onClick={waveButtonHandler}
+              disabled = {!Boolean(currentAccount) || !isRinkeby || tweetValue == ""}
+            >
+              <b>Post Forever</b>
+            </button>
+          </div>
         )}
 
         {writeLoading && (
@@ -264,6 +278,8 @@ export default function App() {
             Total Posts: {totalWaves}
           </div>
         )}
+
+        <br></br>
 
         <WaveList waveList={allWaves} />
 
