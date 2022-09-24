@@ -4,6 +4,7 @@ import './App.css';
 import abi from "../contracts/WavePortal.json";
 import WaveList from "../components/WaveList";
 import classNames from "classnames";
+import Spinner from "../components/Spinner";
 
 export default function App() {
   // state variables
@@ -13,6 +14,7 @@ export default function App() {
   const [totalWaves, setTotalWaves] = useState("");
   const [tweetValue, setTweetValue] = useState("");
   const [walletNetwork, setNetwork] = useState(null);
+  const [writeLoading, setWriteLoading] = useState(false);
 
   const networkName = useMemo(() => {
 		if (!walletNetwork) {
@@ -101,22 +103,23 @@ export default function App() {
       const { ethereum } = window;
 
       if (ethereum) {
+        // prep the txn
         const provider = new ethers.providers.Web3Provider(ethereum);
         const signer = provider.getSigner();
         const wavePortalContract = new ethers.Contract(contractAddress, contractABI, signer);
-
+        // call the smart contract txn function
         const waveTxn = await wavePortalContract.wave(tweetValue, { gasLimit : 300000 })
         console.log("Mining...", waveTxn.hash);
-
         await waveTxn.wait();
         console.log("Mined -- ", waveTxn.hash);
-
-        loadTotalWaves();
-
+        // clean-up
+        setWriteLoading(false);
       } else {
+        setWriteLoading(false);
         console.log("Ethereum object doesn't exist");
       }
     } catch (error) {
+      setWriteLoading(false);
       console.log(error)
     }
   }
@@ -168,23 +171,22 @@ export default function App() {
   	return provider.getNetwork();
   }
 
+  // first page pass
+  useEffect(async () => {
+    checkIfWalletIsConnected();
+    loadTotalWaves();
+    setNetwork(await getNetwork());
+  }, [])
+
   // reload the page on each detected network change
   useEffect(() => {
     if (window.ethereum) {
       window.ethereum.on('chainChanged', () => { window.location.reload(); })
     }
   })
-  
-  // on each page load or reload
-  useEffect(async () => {
-    checkIfWalletIsConnected();
-    loadTotalWaves();
-    setNetwork(await getNetwork());
-    console.log({})
-  }, [])
 
   // when there's a new wave or account just connects:
-  // render the wave list and update the walletNetwork variable
+  // render the wave list, update walletNetwork & writeLoading
   useEffect(() => {
     getAllWaves();
     loadTotalWaves();
@@ -240,13 +242,21 @@ export default function App() {
         </textarea>
 
         {/* the post button */}
-        <button
+        {!writeLoading && (
+          <button
           className="waveButton"
-          onClick={wave}
+          onClick={() => { setWriteLoading(true); wave(); }}
           disabled = {!Boolean(currentAccount) || !isRinkeby}
-        >
+          >
           <b>Post Forever</b>
         </button>
+        )}
+
+        {writeLoading && (
+          <div className="justifyCenter">
+            <Spinner />
+          </div>
+        )}
 
         {/* if there is a currentAccount: render this button */}
         {currentAccount && isRinkeby && (
