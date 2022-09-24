@@ -16,7 +16,7 @@
   text-align: center;
   font-size: 32px;
   font-weight: 600;
-  color: rgb(18,185,129)
+  color: #64bc38;
 }
 
 .bio {
@@ -27,8 +27,19 @@
 }
 
 .input {
-  margin-top: 24px;
-  padding: 8px;
+  marginTop: "16px";
+  padding: "8px";
+  width:100%;
+  height:100px;
+  resize: vertical;
+  padding:8px;
+  border-radius:8px;
+  border: 0;
+  box-shadow:0px 1px 2px rgba(0,0,0,0.05), 
+    0px 2px 4px rgba(0,0,0,0.05), 
+    0px 4px 8px rgba(0,0,0,0.05), 
+    0px 8px 16px rgba(0,0,0,0.05);
+  box-sizing: border-box;
 }
 
 .justifyCenter {
@@ -57,6 +68,18 @@
   margin-top: 8px;
 }
 
+.wavebox {
+  padding:10px;
+  border-radius:8px;
+  margin-bottom:15px;
+  box-shadow:0px 0px 0px 2px rgba(0,0,0,0.05), 
+    0px 2px 4px rgba(0,0,0,0.05),
+    0px 4px 8px rgba(0,0,0,0.05),
+    0px 8px 16px rgba(0,0,0,0);
+  box-sizing: content-box;
+  border:1px solid #c4d4c4;
+}
+
 .waveCount {
   text-align: left;
   color: gray;
@@ -67,6 +90,7 @@
 
 .waveButton {
   cursor: pointer;
+  width: 36%;
   margin-top: 16px;
   padding: 6px 6px 6px 6px;
   border: 0;

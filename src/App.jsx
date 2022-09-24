@@ -4,6 +4,7 @@ import './App.css';
 import abi from "../contracts/WavePortal.json";
 import WaveList from "../components/WaveList";
 import classNames from "classnames";
+import Spinner from "../components/Spinner";
 
 export default function App() {
   // state variables
@@ -13,7 +14,9 @@ export default function App() {
   const [totalWaves, setTotalWaves] = useState("");
   const [tweetValue, setTweetValue] = useState("");
   const [walletNetwork, setNetwork] = useState(null);
-
+  const [writeLoading, setWriteLoading] = useState(false);
+  
+  // Metamask network variables
   const networkName = useMemo(() => {
 		if (!walletNetwork) {
 			return "";
@@ -25,8 +28,8 @@ export default function App() {
   // smart contract data
   const contractAddress = "0xd941a930aEf7C1C4acD16D3274Ff590181fef15F";
   const contractABI = abi.abi;
-
-  // is the wallet connected? function
+  
+  // "is the wallet connected?"
   const checkIfWalletIsConnected = async () => {
     try {
       const { ethereum } = window;
@@ -63,7 +66,6 @@ export default function App() {
         alert("Get MetaMask");
         return;
       }
-
       const accounts = await ethereum.request({ method: "eth_requestAccounts" });
 
       console.log("Connected", accounts[0]);
@@ -97,22 +99,22 @@ export default function App() {
   // call the contract to mine a wave
   // then load up the total waves state
   const wave = async () => {
+    
     try {
-      const { ethereum } = window;
-
+      const { ethereum } = window; 
       if (ethereum) {
+        // prep the txn
         const provider = new ethers.providers.Web3Provider(ethereum);
         const signer = provider.getSigner();
         const wavePortalContract = new ethers.Contract(contractAddress, contractABI, signer);
-
+        // call the smart contract txn function
         const waveTxn = await wavePortalContract.wave(tweetValue, { gasLimit : 300000 })
         console.log("Mining...", waveTxn.hash);
-
         await waveTxn.wait();
         console.log("Mined -- ", waveTxn.hash);
-
+        // clean-up
         loadTotalWaves();
-
+        setWriteLoading(current => !current)
       } else {
         console.log("Ethereum object doesn't exist");
       }
@@ -160,7 +162,7 @@ export default function App() {
   }
 
   // get the wallet's network
-  function getNetwork() {
+  const getNetwork = async() => {
   	if (!window.ethereum) {
   		return false;
   	}
@@ -168,28 +170,40 @@ export default function App() {
   	return provider.getNetwork();
   }
 
+  // wave button handler
+  const waveButtonHandler = () => {
+    setWriteLoading(true)
+    setTweetValue("")
+    return wave()
+  }
+
+  /// STATE EFFECTS
+
+  // first page pass
+  useEffect(async () => {
+    checkIfWalletIsConnected();
+    loadTotalWaves();
+    setNetwork(await getNetwork());
+  }, [])
+
   // reload the page on each detected network change
   useEffect(() => {
     if (window.ethereum) {
       window.ethereum.on('chainChanged', () => { window.location.reload(); })
     }
   })
-  
-  // on each page load or reload
-  useEffect(async () => {
-    checkIfWalletIsConnected();
-    loadTotalWaves();
-    setNetwork(await getNetwork());
-    console.log({})
-  }, [])
 
-  // when there's a new wave or account just connects:
-  // render the wave list and update the walletNetwork variable
+  // when there's a new wave or account first connects:
+  // render the wave list
   useEffect(() => {
-    getAllWaves();
-    loadTotalWaves();
     <WaveList waveList={allWaves} />
-  }, [currentAccount, allWaves])
+  }, [allWaves, currentAccount])
+
+  // for debugging purposes
+  useEffect(() => {
+    console.log('writeLoading is: ', writeLoading);
+    console.log('currentAccount is: ', currentAccount);
+  }, [writeLoading, currentAccount]);
 
   return (
     <div className="mainContainer">
@@ -214,22 +228,23 @@ export default function App() {
 
         {/* if there is a currentAccount: render this button */}
         {/* taking into account the wallet's network */}
-        <div className="justifyCenter">
-          {currentAccount && (
-            <div className="connected"></div>
-          )}
-          <span>Wallet Conected </span>
-          {networkName != "rinkeby" && (
-              <div className="networkInvalid"> (Switch to Rinkeby) </div>
-          )}
-        </div>
+        {currentAccount && (
+          <div className="justifyCenter">
+             <div className="connected"></div>
+             <span>Wallet Conected </span>
+              {networkName != "rinkeby" && (
+                  <div className="networkInvalid"> (Switch to Rinkeby) </div>
+              )}
+          </div>
+        )}
 
         <br></br>
 
+        {/* the text box */}
         <textarea className="input"
           name="tweetArea"
           rows="5"
-          placeholder="Hi! Cool stuff..."
+          placeholder=""
           type="text"
           id="tweet"
           disabled = {!Boolean(currentAccount) || !isRinkeby}
@@ -238,13 +253,24 @@ export default function App() {
         >
         </textarea>
 
-        <button
-          className="waveButton"
-          onClick={wave}
-          disabled = {!Boolean(currentAccount) || !isRinkeby}
-        >
-          <b>Post Forever</b>
-        </button>
+        {/* the post button */}
+        {!writeLoading && (
+          <div className="justifyCenter">
+            <button
+              className="waveButton"
+              onClick={waveButtonHandler}
+              disabled = {!Boolean(currentAccount) || !isRinkeby || tweetValue == ""}
+            >
+              <b>Post Forever</b>
+            </button>
+          </div>
+        )}
+
+        {writeLoading && (
+          <div className="justifyCenter">
+            <Spinner />
+          </div>
+        )}
 
         {/* if there is a currentAccount: render this button */}
         {currentAccount && isRinkeby && (
@@ -252,6 +278,8 @@ export default function App() {
             Total Posts: {totalWaves}
           </div>
         )}
+
+        <br></br>
 
         <WaveList waveList={allWaves} />
 
