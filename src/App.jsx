@@ -216,15 +216,15 @@ export default function App() {
 
         {/* if there is a currentAccount: render this button */}
         {/* taking into account the wallet's network */}
-        <div className="justifyCenter">
-          {currentAccount && (
-            <div className="connected"></div>
-          )}
-          <span>Wallet Conected </span>
-          {networkName != "rinkeby" && (
-              <div className="networkInvalid"> (Switch to Rinkeby) </div>
-          )}
-        </div>
+        {currentAccount && (
+          <div className="justifyCenter">
+             <div className="connected"></div>
+             <span>Wallet Conected </span>
+              {networkName != "rinkeby" && (
+                  <div className="networkInvalid"> (Switch to Rinkeby) </div>
+              )}
+          </div>
+        )}
 
         <br></br>
 
