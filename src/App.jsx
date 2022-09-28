@@ -267,6 +267,7 @@ export default function App() {
           </div>
         )}
 
+        {/* spinner with text */}
         {writeLoading && (
           <div className="justifyCenter">
             <Spinner />
