@@ -6,6 +6,7 @@ import WaveList from "../components/WaveList";
 import classNames from "classnames";
 import Spinner from "../components/Spinner";
 
+// v4
 export default function App() {
   // state variables
   const [currentAccount, setCurrentAccount] = useState("");
@@ -269,6 +270,7 @@ export default function App() {
         {writeLoading && (
           <div className="justifyCenter">
             <Spinner />
+            <div className="heartbeat">mining the transaction (takes a minute)</div>
           </div>
         )}
 
