@@ -6,7 +6,7 @@ import WaveList from "../components/WaveList";
 import classNames from "classnames";
 import Spinner from "../components/Spinner";
 
-// v4
+// v5
 export default function App() {
   // state variables
   const [currentAccount, setCurrentAccount] = useState("");
