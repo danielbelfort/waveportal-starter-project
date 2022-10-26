@@ -6,7 +6,7 @@ import WaveList from "../components/WaveList";
 import classNames from "classnames";
 import Spinner from "../components/Spinner";
 
-// v4
+// v5
 export default function App() {
   // state variables
   const [currentAccount, setCurrentAccount] = useState("");
@@ -24,10 +24,10 @@ export default function App() {
 		}
 		return walletNetwork.name;
 	}, [walletNetwork]);
-  const isRinkeby = networkName === "rinkeby";
+  const isGoerli = networkName === "goerli";
 
   // smart contract data
-  const contractAddress = "0xd941a930aEf7C1C4acD16D3274Ff590181fef15F";
+  const contractAddress = "0xCf6f409E9D25f631c45d8Ae0Cd8C501617DE7671";
   const contractABI = abi.abi;
   
   // "is the wallet connected?"
@@ -211,7 +211,7 @@ export default function App() {
       <div className="dataContainer">
 
         <div className="header">
-          Daniel's Immutable Guest Book 🍃
+          The Immutable Guest Book 📖
         </div>
 
         <div className="bio">
@@ -233,8 +233,8 @@ export default function App() {
           <div className="justifyCenter">
              <div className="connected"></div>
              <span>Wallet Conected </span>
-              {networkName != "rinkeby" && (
-                  <div className="networkInvalid"> (Switch to Rinkeby) </div>
+              {networkName != "goerli" && (
+                  <div className="networkInvalid"> (Switch to Goerli) </div>
               )}
           </div>
         )}
@@ -248,7 +248,7 @@ export default function App() {
           placeholder=""
           type="text"
           id="tweet"
-          disabled = {!Boolean(currentAccount) || !isRinkeby}
+          disabled = {!Boolean(currentAccount) || !isGoerli}
           value={tweetValue}
           onChange={e => setTweetValue(e.target.value)}
         >
@@ -260,13 +260,14 @@ export default function App() {
             <button
               className="waveButton"
               onClick={waveButtonHandler}
-              disabled = {!Boolean(currentAccount) || !isRinkeby || tweetValue == ""}
+              disabled = {!Boolean(currentAccount) || !isGoerli || tweetValue == ""}
             >
               <b>Post Forever</b>
             </button>
           </div>
         )}
 
+        {/* spinner with text */}
         {writeLoading && (
           <div className="justifyCenter">
             <Spinner />
@@ -275,7 +276,7 @@ export default function App() {
         )}
 
         {/* if there is a currentAccount: render this button */}
-        {currentAccount && isRinkeby && (
+        {currentAccount && isGoerli && (
           <div className="waveCount">
             Total Posts: {totalWaves}
           </div>
