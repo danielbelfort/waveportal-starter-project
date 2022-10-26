@@ -211,7 +211,7 @@ export default function App() {
       <div className="dataContainer">
 
         <div className="header">
-          The Immutable Guest Book 📖
+          The Immutable Guest Book 🍃
         </div>
 
         <div className="bio">
